@@ -1,0 +1,50 @@
+---
+title: "Machine Learning to predict EUR in Permian"
+author: "Dario H. Romero, MSc - CPQ Energy & Analytics <http://www.cpq-energy.com>"
+date: "August 30, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is a document that outlines a workflow to predict EUR (Estimated Ultimate Recovery) by using a  
+Supervised Learning algorithm in the language R. Some minor modifications would allow to translate  
+it to Python. The model can later be used in PetroVisor.  
+
+```{r read}
+setwd('/home/drome/RProjects/permian/')
+hdr = read.csv(file = "header_permian.csv", sep = ",", dec = ".",
+               colClasses = c(rep("character", 2), rep("factor", 2),
+                              rep("character", 9), "numeric", 
+                              rep("character", 3),
+                              rep("numeric", 2), "character", rep("numeric", 2)
+                              ), na.strings=c("NA","NaN", " ", "NULL")
+               )
+names(hdr) <- tolower(names(hdr))
+hdr <- hdr[hdr$wellstat == 'A',]
+hdr <- hdr[hdr$productcd == 'O',]
+hdr$wellnm <- paste(hdr$leasenm, paste('-', hdr$wellnr, sep = ''), sep = '')
+hdr <- hdr[grep('^(APACHE)', hdr$opernm),]
+hdr <- hdr[,c(1,23,2,5,6,7,8,10,11,12,14,15,16,18,19,21,22)]
+table(hdr$countynm)
+hdr <- hdr[hdr$countynm == 'CRANE',]
+table(hdr$formationcd)
+hdr <- hdr[hdr$formationcd == '453GBSA',]
+hdr[hdr$resrvrnm == 'UNKNOWN' & hdr$formationcd == '453GBSA', 'resrvrnm'] <- 'GRAYBURG/SNAND'
+hdr$wellnm <- gsub('--', '-', hdr$wellnm)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
